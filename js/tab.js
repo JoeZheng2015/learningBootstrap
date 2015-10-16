@@ -22,7 +22,7 @@
   Tab.VERSION = '3.3.5'
 
   Tab.TRANSITION_DURATION = 150
-
+  // 负责找到需要active的元素，及他的父元素。
   Tab.prototype.show = function () {
     var $this    = this.element
     var $ul      = $this.closest('ul:not(.dropdown-menu)')
@@ -62,7 +62,8 @@
       })
     })
   }
-
+  // 负责去除container中的active类，和为element增加active类
+  // 利用transitionEnd完美衔接当前元素和下一个元素的过渡
   Tab.prototype.activate = function (element, container, callback) {
     var $active    = container.find('> .active')
     var transition = callback
@@ -101,13 +102,14 @@
 
       callback && callback()
     }
-
+    // 如果有过渡效果，等待当前元素消失，触发transitionEnd事件，然后再出现
+    // 如果是没有过渡效果的，直接切换active。
     $active.length && transition ?
       $active
         .one('bsTransitionEnd', next)
         .emulateTransitionEnd(Tab.TRANSITION_DURATION) :
       next()
-
+    // 使得当前的显示的元素渐隐
     $active.removeClass('in')
   }
 
@@ -142,7 +144,7 @@
 
   // TAB DATA-API
   // ============
-
+  // 这种方式，使得Plugin这个构造函数作为一个入口
   var clickHandler = function (e) {
     e.preventDefault()
     Plugin.call($(this), 'show')
