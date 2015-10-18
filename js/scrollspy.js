@@ -12,8 +12,13 @@
 
   // SCROLLSPY CLASS DEFINITION
   // ==========================
-
+  /**
+   * 完成滚动对象、nav对象、滚动事件绑定、初始化refresh()和process()
+   * @param {string} element 含有[data-spy="scroll"]的dom对象
+   * @param {[type]} options [description]
+   */
   function ScrollSpy(element, options) {
+    debugger;
     this.$body          = $(document.body)
     this.$scrollElement = $(element).is(document.body) ? $(window) : $(element)
     this.options        = $.extend({}, ScrollSpy.DEFAULTS, options)
@@ -33,11 +38,21 @@
   ScrollSpy.DEFAULTS = {
     offset: 10
   }
-
+  /**
+   * 获取要监听的元素的内容高度，或body的内容高度
+   * @return {number} 内容高度
+   */
   ScrollSpy.prototype.getScrollHeight = function () {
+    // scrollHeigth是元素内容的高度，包括overflow导致不可见的部分
+    // this.$body[0].scrollHeight和document.body.scrollHeight其实是一样的
+    // 在DTD声明和未声明时，document.documentElement.scrollHeight和document.body.scrollHeight有一个会为可视窗口高度
+    // 所以用Math.max取得全部内容高度
     return this.$scrollElement[0].scrollHeight || Math.max(this.$body[0].scrollHeight, document.documentElement.scrollHeight)
   }
-
+  /**
+   * [refresh description]
+   * @return {[type]} [description]
+   */
   ScrollSpy.prototype.refresh = function () {
     var that          = this
     var offsetMethod  = 'offset'
@@ -132,17 +147,21 @@
 
   // SCROLLSPY PLUGIN DEFINITION
   // ===========================
+/**
+ * 把[data-spy="scroll"]的dom元素，及元素property上的参数传给ScrollSpy构造函数
+ * @param {object} option 之前绑定在元素上的property对象
+ *                        自定义的包含指定content的对象，如{target: '#nav-example'}
+ */
+function Plugin(option) {
+  return this.each(function () {
+    var $this   = $(this)
+    var data    = $this.data('bs.scrollspy')
+    var options = typeof option == 'object' && option
 
-  function Plugin(option) {
-    return this.each(function () {
-      var $this   = $(this)
-      var data    = $this.data('bs.scrollspy')
-      var options = typeof option == 'object' && option
-
-      if (!data) $this.data('bs.scrollspy', (data = new ScrollSpy(this, options)))
-      if (typeof option == 'string') data[option]()
-    })
-  }
+    if (!data) $this.data('bs.scrollspy', (data = new ScrollSpy(this, options)))
+    if (typeof option == 'string') data[option]()
+  })
+}
 
   var old = $.fn.scrollspy
 

@@ -39,7 +39,8 @@
     // 如果点击的是自己，则不没有变化（即不执行后面的代码）
     if ($this.parent('li').hasClass('active')) return
     var $previous = $ul.find('.active:last a')
-    // 自定义触发前事件并触发
+    // 自定义触发前事件,可以用$el.on('hide.bs.tab', function(){})定义高亮元素消失前的逻辑
+    // 第二个参数里面的属性，会作为事件对象e的属性
     var hideEvent = $.Event('hide.bs.tab', {
       relatedTarget: $this[0]
     })
@@ -71,17 +72,20 @@
   // 利用transitionEnd完美衔接当前元素和下一个元素的过渡
   /**
    * 负责去除container内的active类，激活element，然后调用callback（即自定义的触发后事件)
-   * @param  {[type]}   element   [description]
-   * @param  {[type]}   container [description]
-   * @param  {Function} callback  [description]
-   * @return {[type]}             [description]
+   * @param  {jquery}   element   需要高亮的jquery对象
+   * @param  {jquery}   container 包含当前高亮，和即将高亮元素的父容器
+   * @param  {Function} callback  用于在过渡完成后，触发自定义事件
+   * @return {undefined}             没有返回值
    */
   Tab.prototype.activate = function (element, container, callback) {
-    var $active    = container.find('> .active')
+    var $active    = container.find('> .active') // 匹配其自带中，带有active类的
     var transition = callback
       && $.support.transition
       && ($active.length && $active.hasClass('fade') || !!container.find('> .fade').length)
-
+    /**
+     * 完成当前高亮元素出去active，element增加active类
+     * @return {undefined} 没有返回
+     */
     function next() {
       $active
         .removeClass('active')
@@ -114,8 +118,9 @@
 
       callback && callback()
     }
-    // 如果有过渡效果，等待当前元素消失，触发transitionEnd事件，然后再出现
-    // 如果是没有过渡效果的，直接切换active。
+    // 如果有过渡效果，等待当前元素完成过渡且触发transitionEnd事件时，再调用next方法出现
+    // 如果是没有过渡效果的，调用next方法切换active
+    // emulateTransitionEnd方法是等过渡后，检查是否触发transitionEnd事件，如果没有强制触发。保证逻辑一定完成
     $active.length && transition ?
       $active
         .one('bsTransitionEnd', next)
@@ -128,21 +133,21 @@
 
   // TAB PLUGIN DEFINITION
   // =====================
-  /**
-   * 遍历初始化对应的Tab实例，并把实例存在其data里（即Property里）
-   * 遍历jquery对象组，把对应的dom对象传入Tab构造函数
-   * @param {string} option 有两种情况：自带的绑定，传入'show'，则会在触发点击事件是调用show()函数
-   *                        用js自定义如：$el.tab()，则只是绑定事件
-   */
-  function Plugin(option) {
-    return this.each(function () {
-      var $this = $(this)
-      var data  = $this.data('bs.tab')
+/**
+ * 遍历初始化对应的Tab实例，并把实例存在其data里（即Property里）
+ * 遍历jquery对象组，把对应的dom对象传入Tab构造函数
+ * @param {string} option 有两种情况：自带的绑定，传入'show'，则会在触发点击事件是调用show()函数
+ *                        用js自定义如：$el.tab()，则只是绑定事件
+ */
+function Plugin(option) {
+  return this.each(function () {
+    var $this = $(this)
+    var data  = $this.data('bs.tab')
 
-      if (!data) $this.data('bs.tab', (data = new Tab(this)))
-      if (typeof option == 'string') data[option]()
-    })
-  }
+    if (!data) $this.data('bs.tab', (data = new Tab(this)))
+    if (typeof option == 'string') data[option]()
+  })
+}
 
   var old = $.fn.tab
 
