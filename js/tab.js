@@ -22,20 +22,24 @@
   Tab.VERSION = '3.3.5'
 
   Tab.TRANSITION_DURATION = 150
-  // 负责找到需要active的元素，及他的父元素。
+  /**
+   * 找到需要activate的元素，以及其container元素
+   * 调用两次activate函数，一次切换tab，一次切换content 
+   * @return {undefined} 没有返回值
+   */
   Tab.prototype.show = function () {
-    var $this    = this.element
+    var $this    = this.element // 默认的tab，或用jquery绑定的元素
     var $ul      = $this.closest('ul:not(.dropdown-menu)')
-    var selector = $this.data('target')
+    var selector = $this.data('target')// 每个tab对应的content
 
     if (!selector) {
       selector = $this.attr('href')
       selector = selector && selector.replace(/.*(?=#[^\s]*$)/, '') // strip for ie7
     }
-
+    // 如果点击的是自己，则不没有变化（即不执行后面的代码）
     if ($this.parent('li').hasClass('active')) return
-
     var $previous = $ul.find('.active:last a')
+    // 自定义触发前事件并触发
     var hideEvent = $.Event('hide.bs.tab', {
       relatedTarget: $this[0]
     })
@@ -49,8 +53,9 @@
     if (showEvent.isDefaultPrevented() || hideEvent.isDefaultPrevented()) return
 
     var $target = $(selector)
-
+    // 传入当前tab的a标签的li，及其container，完成tab页切换
     this.activate($this.closest('li'), $ul)
+    // 同上，完成content页的切换，且自定义触发后事件
     this.activate($target, $target.parent(), function () {
       $previous.trigger({
         type: 'hidden.bs.tab',
@@ -64,6 +69,13 @@
   }
   // 负责去除container中的active类，和为element增加active类
   // 利用transitionEnd完美衔接当前元素和下一个元素的过渡
+  /**
+   * 负责去除container内的active类，激活element，然后调用callback（即自定义的触发后事件)
+   * @param  {[type]}   element   [description]
+   * @param  {[type]}   container [description]
+   * @param  {Function} callback  [description]
+   * @return {[type]}             [description]
+   */
   Tab.prototype.activate = function (element, container, callback) {
     var $active    = container.find('> .active')
     var transition = callback
@@ -116,7 +128,12 @@
 
   // TAB PLUGIN DEFINITION
   // =====================
-
+  /**
+   * 遍历初始化对应的Tab实例，并把实例存在其data里（即Property里）
+   * 遍历jquery对象组，把对应的dom对象传入Tab构造函数
+   * @param {string} option 有两种情况：自带的绑定，传入'show'，则会在触发点击事件是调用show()函数
+   *                        用js自定义如：$el.tab()，则只是绑定事件
+   */
   function Plugin(option) {
     return this.each(function () {
       var $this = $(this)
