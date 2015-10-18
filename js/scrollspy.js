@@ -14,13 +14,13 @@
   // ==========================
   /**
    * 完成滚动对象、nav对象、滚动事件绑定、初始化refresh()和process()
-   * @param {string} element 含有[data-spy="scroll"]的dom对象
-   * @param {[type]} options [description]
+   * @param {object} element 含有[data-spy="scroll"]的dom对象
+   * @param {object} options 定义offsets的参数
    */
   function ScrollSpy(element, options) {
-    debugger;
     this.$body          = $(document.body)
-    this.$scrollElement = $(element).is(document.body) ? $(window) : $(element)
+    // 滚动对象，如果绑定在body上，则滚动对象为window，否则为绑定的元素
+    this.$scrollElement = $(element).is(document.body) ? $(window) : $(element) 
     this.options        = $.extend({}, ScrollSpy.DEFAULTS, options)
     this.selector       = (this.options.target || '') + ' .nav li > a'
     this.offsets        = []
@@ -50,8 +50,8 @@
     return this.$scrollElement[0].scrollHeight || Math.max(this.$body[0].scrollHeight, document.documentElement.scrollHeight)
   }
   /**
-   * [refresh description]
-   * @return {[type]} [description]
+   * 确定各a标签（放到targets中），及其对应的锚点位置（放到offsets中）
+   * @return {undefined} 无返回值
    */
   ScrollSpy.prototype.refresh = function () {
     var that          = this
@@ -61,20 +61,24 @@
     this.offsets      = []
     this.targets      = []
     this.scrollHeight = this.getScrollHeight()
-
+    // 如果监听的滚动对象不是body，则使用position方法来获取offsets值
+    // jquery的offset()方法是获取匹配元素在当前视口的相对偏移
+    // position()方法是获取匹配元素相对父元素的偏移
     if (!$.isWindow(this.$scrollElement[0])) {
       offsetMethod = 'position'
       offsetBase   = this.$scrollElement.scrollTop()
     }
 
     this.$body
+      // 找到全部的锚点
       .find(this.selector)
       .map(function () {
         var $el   = $(this)
         var href  = $el.data('target') || $el.attr('href')
         var $href = /^#./.test(href) && $(href)
-
-        return ($href
+        // 返回由[offsets，锚点]组成的数组
+        // jquery的map有点奇怪，return值或return[值]得到的都是数组。return [[值]]得到的才是数组组成的数组
+        return ($href 
           && $href.length
           && $href.is(':visible')
           && [[$href[offsetMethod]().top + offsetBase, href]]) || null
@@ -85,46 +89,53 @@
         that.targets.push(this[1])
       })
   }
-
+  /**
+   * 根据this.offsets与当前的scrollTop比较，判断是否需要activate
+   * @return {undefined} 没有返回值
+   */
   ScrollSpy.prototype.process = function () {
-    var scrollTop    = this.$scrollElement.scrollTop() + this.options.offset
-    var scrollHeight = this.getScrollHeight()
-    var maxScroll    = this.options.offset + scrollHeight - this.$scrollElement.height()
+    var scrollTop    = this.$scrollElement.scrollTop() + this.options.offset // 加上规定offset的，距离顶部的值
+    var scrollHeight = this.getScrollHeight() // 当前的内容高度
+    var maxScroll    = this.options.offset + scrollHeight - this.$scrollElement.height() // offset值+内容高度-可视高度得到的最大可滚动高度
     var offsets      = this.offsets
     var targets      = this.targets
-    var activeTarget = this.activeTarget
+    var activeTarget = this.activeTarget // 当前的激活nav
     var i
 
     if (this.scrollHeight != scrollHeight) {
       this.refresh()
     }
-
+    // 超过当前元素的最大可滚动高度，直接激活最后一个nav
     if (scrollTop >= maxScroll) {
       return activeTarget != (i = targets[targets.length - 1]) && this.activate(i)
     }
-
+    // 没超过第一个offset，清除当前的激活对象
     if (activeTarget && scrollTop < offsets[0]) {
       this.activeTarget = null
       return this.clear()
     }
-
+    // 最精彩的部分，循环判断是否需要激活
     for (i = offsets.length; i--;) {
-      activeTarget != targets[i]
-        && scrollTop >= offsets[i]
-        && (offsets[i + 1] === undefined || scrollTop < offsets[i + 1])
-        && this.activate(targets[i])
+      activeTarget != targets[i] // 满足当前遍历的target不是激活对象
+        && scrollTop >= offsets[i] // 满足当前滚动高度大于对应的offset
+        && (offsets[i + 1] === undefined || scrollTop < offsets[i + 1]) // 满足当前滚动高度小于下一个滚动高度，或下一个滚动高度未定义
+        && this.activate(targets[i]) // 激活该nav
     }
   }
-
+  /**
+   * 激活传进来的dom对象（即为其添加active类）
+   * @param  {object} target dom对象
+   * @return {undefined}        无返回值
+   */
   ScrollSpy.prototype.activate = function (target) {
-    this.activeTarget = target
+    this.activeTarget = target // 先把该对象存入实例对象中
 
-    this.clear()
+    this.clear() // 清除当前的激活对象
 
     var selector = this.selector +
       '[data-target="' + target + '"],' +
       this.selector + '[href="' + target + '"]'
-
+    // 为对应的a标签的父元素li添加active类
     var active = $(selector)
       .parents('li')
       .addClass('active')
@@ -134,10 +145,13 @@
         .closest('li.dropdown')
         .addClass('active')
     }
-
+    // 触发自定义事件
     active.trigger('activate.bs.scrollspy')
   }
-
+  /**
+   * 清除当前的nav中的激活对象
+   * @return {[type]} [description]
+   */
   ScrollSpy.prototype.clear = function () {
     $(this.selector)
       .parentsUntil(this.options.target, '.active')
