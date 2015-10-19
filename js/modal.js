@@ -12,18 +12,22 @@
 
   // MODAL CLASS DEFINITION
   // ======================
-
+  /**
+   * [Modal description]
+   * @param {object} element 模态框的dom对象
+   * @param {object} options 参数
+   */
   var Modal = function (element, options) {
     this.options             = options
     this.$body               = $(document.body)
-    this.$element            = $(element)
+    this.$element            = $(element) // 模态框的jquery对象
     this.$dialog             = this.$element.find('.modal-dialog')
     this.$backdrop           = null
     this.isShown             = null
     this.originalBodyPad     = null
     this.scrollbarWidth      = 0
     this.ignoreBackdropClick = false
-
+    // 这里没弄太懂
     if (this.options.remote) {
       this.$element
         .find('.modal-content')
@@ -286,7 +290,11 @@
 
   // MODAL PLUGIN DEFINITION
   // =======================
-
+  /**
+   * 取触发元素上的data()，获得对应参数并实例化Modal
+   * @param {object} option         触发元素的缓存数据对象，或字符串直接调用方法
+   * @param {object} _relatedTarget 触发元素的dom对象
+   */
   function Plugin(option, _relatedTarget) {
     return this.each(function () {
       var $this   = $(this)
@@ -316,7 +324,7 @@
 
   // MODAL DATA-API
   // ==============
-
+  // 在初始化时为含data-toggle属性的元素绑定点击事件
   $(document).on('click.bs.modal.data-api', '[data-toggle="modal"]', function (e) {
     var $this   = $(this)
     var href    = $this.attr('href')
@@ -331,6 +339,8 @@
         $this.is(':visible') && $this.trigger('focus')
       })
     })
+    // 把对应的模态框的juqery对象作为this，传入Plugin中
+    // 把参数和触发元素作为参数参数Plugin中
     Plugin.call($target, option, this)
   })
 
