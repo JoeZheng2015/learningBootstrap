@@ -23,28 +23,23 @@
     </style>
     </head>
     <body>
-      <div class="dropdown">
-      <button data-toggle="dropdown">点击</button>
-        <ul class="dropdown-menu">
-          <li>item1</li>
-          <li>item1</li>
-          <li>item3</li>
-        </ul>
-      </div>
-      <div class="test">
-      <button data-toggle="dropdown" data-target=".test">点击我</button>
-        <ul class="dropdown-menu">
-          <li>1</li>
-          <li>2</li>
-          <li>3</li>
-        </ul>
+      <button type="button" class="btn" data-toggle="modal" data-target="#myModal">
+        触发按钮
+      </button>
+      <div class="modal" id="myModal">
+        <div class="modal-content">
+          <div class="modal-header">
+            title
+          </div>
+          <div class="modal-body">
+            body
+          </div>
+        </div>
       </div>
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="../js/jquery.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
-      <script src="../../js/transition.js"></script>
-    <script src="../../js/scrollspy.js"></script>
-    <script src="../../js/dropdown.js"></script>
+    <script src="../../js/modal.js"></script>
     <script>
       $(function () {
       });
