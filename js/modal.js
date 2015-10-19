@@ -13,7 +13,7 @@
   // MODAL CLASS DEFINITION
   // ======================
   /**
-   * [Modal description]
+   * 初始化实例属性，如有有remote则从远端加载内容
    * @param {object} element 模态框的dom对象
    * @param {object} options 参数
    */
@@ -27,7 +27,7 @@
     this.originalBodyPad     = null
     this.scrollbarWidth      = 0
     this.ignoreBackdropClick = false
-    // 这里没弄太懂
+    // 从指定url中load内容
     if (this.options.remote) {
       this.$element
         .find('.modal-content')
@@ -51,7 +51,11 @@
   Modal.prototype.toggle = function (_relatedTarget) {
     return this.isShown ? this.hide() : this.show(_relatedTarget)
   }
-
+  /**
+   * [show description]
+   * @param  {object} _relatedTarget 触发元素的dom对象
+   * @return {undefined}                无返回值
+   */
   Modal.prototype.show = function (_relatedTarget) {
     var that = this
     var e    = $.Event('show.bs.modal', { relatedTarget: _relatedTarget })
@@ -257,13 +261,19 @@
       paddingRight: ''
     })
   }
-
+  /**
+   * 检查当前是否有滚动条
+   * @return {[type]} [description]
+   */
   Modal.prototype.checkScrollbar = function () {
-    var fullWindowWidth = window.innerWidth
+    var fullWindowWidth = window.innerWidth // 窗口大小，包含滚动条的整个窗口
     if (!fullWindowWidth) { // workaround for missing window.innerWidth in IE8
       var documentElementRect = document.documentElement.getBoundingClientRect()
+      // IE8没有window.innerWidth，所以需要用左边减右边来获得窗口大小
       fullWindowWidth = documentElementRect.right - Math.abs(documentElementRect.left)
     }
+    // 窗口大小是否大于可视窗口大小，来判断是否overflow。如果大于，则overflow
+    // 窗口大小比可视窗口大小大的值，其实就是滚动条的宽度
     this.bodyIsOverflowing = document.body.clientWidth < fullWindowWidth
     this.scrollbarWidth = this.measureScrollbar()
   }
@@ -277,7 +287,10 @@
   Modal.prototype.resetScrollbar = function () {
     this.$body.css('padding-right', this.originalBodyPad)
   }
-
+  /**
+   * 通过在页面插入div，来测量滚动条的宽度
+   * @return {number} 滚动条的宽度
+   */
   Modal.prototype.measureScrollbar = function () { // thx walsh
     var scrollDiv = document.createElement('div')
     scrollDiv.className = 'modal-scrollbar-measure'
@@ -300,9 +313,9 @@
       var $this   = $(this)
       var data    = $this.data('bs.modal')
       var options = $.extend({}, Modal.DEFAULTS, $this.data(), typeof option == 'object' && option)
-
       if (!data) $this.data('bs.modal', (data = new Modal(this, options)))
       if (typeof option == 'string') data[option](_relatedTarget)
+      // Modal.DEFAULTS中show为ture，所以点击时，是在这里触发的
       else if (options.show) data.show(_relatedTarget)
     })
   }
