@@ -153,7 +153,7 @@
         }
       }, this))
   }
-
+  /** 允许使用ESC来关闭模态框 */
   Modal.prototype.escape = function () {
     if (this.isShown && this.options.keyboard) {
       this.$element.on('keydown.dismiss.bs.modal', $.proxy(function (e) {
@@ -262,7 +262,7 @@
     })
   }
   /**
-   * 检查当前是否有滚动条
+   * 检查当前是否overflow，并获取滚动条宽度
    * @return {[type]} [description]
    */
   Modal.prototype.checkScrollbar = function () {
@@ -273,11 +273,13 @@
       fullWindowWidth = documentElementRect.right - Math.abs(documentElementRect.left)
     }
     // 窗口大小是否大于可视窗口大小，来判断是否overflow。如果大于，则overflow
-    // 窗口大小比可视窗口大小大的值，其实就是滚动条的宽度
+    // 窗口大小比可视窗口大小大的值，其实就是滚动条的宽度（不用这个方法获取滚动条宽度是，万一页面没有滚动条，那就无法获取滚动条宽度）
     this.bodyIsOverflowing = document.body.clientWidth < fullWindowWidth
     this.scrollbarWidth = this.measureScrollbar()
   }
-
+  /**
+   * 如果有滚动条，则body需要padding-right，滚动条宽度的值
+   */
   Modal.prototype.setScrollbar = function () {
     var bodyPad = parseInt((this.$body.css('padding-right') || 0), 10)
     this.originalBodyPad = document.body.style.paddingRight || ''
@@ -295,6 +297,7 @@
     var scrollDiv = document.createElement('div')
     scrollDiv.className = 'modal-scrollbar-measure'
     this.$body.append(scrollDiv)
+    // offsetWidth是布局宽度，包含滚动条。而clientWidth是可视宽度。所以得到滚动条宽度
     var scrollbarWidth = scrollDiv.offsetWidth - scrollDiv.clientWidth
     this.$body[0].removeChild(scrollDiv)
     return scrollbarWidth
