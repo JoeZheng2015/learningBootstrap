@@ -13,7 +13,11 @@
 
   // TOOLTIP PUBLIC CLASS DEFINITION
   // ===============================
-
+  /**
+   * 初始化所有属性为null，然后调用init方法
+   * @param {object} element tooltip的触发dom元素
+   * @param {object} options 在初始化时，传入Tooltips构造函数的参数
+   */
   var Tooltip = function (element, options) {
     this.type       = null
     this.options    = null
@@ -45,25 +49,33 @@
       padding: 0
     }
   }
-
+  /**
+   * [init description]
+   * @param  {string} type    'tooltip'做命名空间
+   * @param  {object} element 触发tooltip的dom元素
+   * @param  {object} options 初始化时的参数
+   * @return {undefined}         无返回
+   */
   Tooltip.prototype.init = function (type, element, options) {
     this.enabled   = true
     this.type      = type
-    this.$element  = $(element)
-    this.options   = this.getOptions(options)
+    this.$element  = $(element) // 触发tooltip的dom元素
+    this.options   = this.getOptions(options) // 包含默认+缓存的+初始化的传入的，全面的options参数
     this.$viewport = this.options.viewport && $($.isFunction(this.options.viewport) ? this.options.viewport.call(this, this.$element) : (this.options.viewport.selector || this.options.viewport))
     this.inState   = { click: false, hover: false, focus: false }
-
+    // 这里不懂原理。功能是保证selector是有效
     if (this.$element[0] instanceof document.constructor && !this.options.selector) {
       throw new Error('`selector` option must be specified when initializing ' + this.type + ' on the window.document object!')
     }
-
+    // 默认的是hover和focus，即['hover', 'focus']
     var triggers = this.options.trigger.split(' ')
 
     for (var i = triggers.length; i--;) {
       var trigger = triggers[i]
 
       if (trigger == 'click') {
+        // 这里selector默认是false，这是会被当作data传入（即e.data = false）
+        // 应该是可以指定selector的
         this.$element.on('click.' + this.type, this.options.selector, $.proxy(this.toggle, this))
       } else if (trigger != 'manual') {
         var eventIn  = trigger == 'hover' ? 'mouseenter' : 'focusin'
@@ -73,7 +85,8 @@
         this.$element.on(eventOut + '.' + this.type, this.options.selector, $.proxy(this.leave, this))
       }
     }
-
+    // 如果selector为true，重置trigger和selector，然后放到_options中？
+    // 如果selector为false，把title内容放到data-origin-title中？
     this.options.selector ?
       (this._options = $.extend({}, this.options, { trigger: 'manual', selector: '' })) :
       this.fixTitle()
@@ -82,7 +95,11 @@
   Tooltip.prototype.getDefaults = function () {
     return Tooltip.DEFAULTS
   }
-
+  /**
+   * 返回具体的options参数
+   * @param  {object} options 初始化时的参数
+   * @return {object}         包含缓存在元素上，及默认的options参数
+   */
   Tooltip.prototype.getOptions = function (options) {
     options = $.extend({}, this.getDefaults(), this.$element.data(), options)
 
@@ -339,7 +356,7 @@
 
     return this
   }
-
+  /** 把title的内容存到data-origin-title中，再把title设为空字符 */
   Tooltip.prototype.fixTitle = function () {
     var $e = this.$element
     if ($e.attr('title') || typeof $e.attr('data-original-title') != 'string') {

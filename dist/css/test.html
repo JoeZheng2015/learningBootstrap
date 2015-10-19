@@ -17,31 +17,26 @@
       <script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
     <style>
-    .test {
-      position: relative;
+    body {
+      padding-top: 100px;
     }
     </style>
     </head>
     <body>
-      <button type="button" class="btn" data-toggle="modal" data-target="#myModal">
-        触发按钮
-      </button>
-      <div class="modal" id="myModal">
-        <div class="modal-content">
-          <div class="modal-header">
-            title
-          </div>
-          <div class="modal-body">
-            body
-          </div>
-        </div>
-      </div>
+      <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="left" title="Tooltip on left">Tooltip on left</button>
+
+      <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="top" title="Tooltip on top">Tooltip on top</button>
+
+      <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="bottom" title="Tooltip on bottom">Tooltip on bottom</button>
+
+      <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="right" title="Tooltip on right">Tooltip on right</button>
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="../js/jquery.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="../../js/modal.js"></script>
+    <script src="../../js/tooltip.js"></script>
     <script>
       $(function () {
+        $('[data-toggle="tooltip"]').tooltip();
       });
     </script>
     </body>
