@@ -74,20 +74,21 @@
     this.resize()
 
     this.$element.on('click.dismiss.bs.modal', '[data-dismiss="modal"]', $.proxy(this.hide, this))
-
+    // 这里不知道干嘛
     this.$dialog.on('mousedown.dismiss.bs.modal', function () {
       that.$element.one('mouseup.dismiss.bs.modal', function (e) {
         if ($(e.target).is(that.$element)) that.ignoreBackdropClick = true
       })
     })
-
+    // 调用遮罩层出现和消失的逻辑，并传入回调
+    // 在回调里模态框出现，所以是先出现遮罩层再出现模态框。
     this.backdrop(function () {
       var transition = $.support.transition && that.$element.hasClass('fade')
 
       if (!that.$element.parent().length) {
         that.$element.appendTo(that.$body) // don't move modals dom position
       }
-
+      // 这里scrollTop(0)干嘛？
       that.$element
         .show()
         .scrollTop(0)
@@ -113,7 +114,7 @@
         that.$element.trigger('focus').trigger(e)
     })
   }
-
+  /** 先取消一系列事件，然后调用去除过渡，在调用hideModal隐藏模态框 */
   Modal.prototype.hide = function (e) {
     if (e) e.preventDefault()
 
@@ -143,7 +144,7 @@
         .emulateTransitionEnd(Modal.TRANSITION_DURATION) :
       this.hideModal()
   }
-
+  /** 自动聚焦 */
   Modal.prototype.enforceFocus = function () {
     $(document)
       .off('focusin.bs.modal') // guard against infinite focus loop
@@ -163,7 +164,7 @@
       this.$element.off('keydown.dismiss.bs.modal')
     }
   }
-
+  /** 在调整窗口大小时，根据body和模态框是否超出，来增加对应的padding */
   Modal.prototype.resize = function () {
     if (this.isShown) {
       $(window).on('resize.bs.modal', $.proxy(this.handleUpdate, this))
@@ -171,7 +172,7 @@
       $(window).off('resize.bs.modal')
     }
   }
-
+  /** 完成隐藏模态框的相应逻辑 */
   Modal.prototype.hideModal = function () {
     var that = this
     this.$element.hide()
@@ -182,19 +183,24 @@
       that.$element.trigger('hidden.bs.modal')
     })
   }
-
+  /** 移除遮罩层 */
   Modal.prototype.removeBackdrop = function () {
     this.$backdrop && this.$backdrop.remove()
     this.$backdrop = null
   }
-
+  /**
+   * 负责模态框出现后，增加遮罩层，及模态框消失时取出遮罩层的逻辑
+   * @param  {Function} callback 遮罩层出现后，及消失后的回调
+   * @return {undefined}            无
+   */
   Modal.prototype.backdrop = function (callback) {
     var that = this
     var animate = this.$element.hasClass('fade') ? 'fade' : ''
-
+    // backdrop默认为true
+    // 如果已经show了
     if (this.isShown && this.options.backdrop) {
       var doAnimate = $.support.transition && animate
-
+      // 插入遮罩层
       this.$backdrop = $(document.createElement('div'))
         .addClass('modal-backdrop ' + animate)
         .appendTo(this.$body)
@@ -245,7 +251,10 @@
   Modal.prototype.handleUpdate = function () {
     this.adjustDialog()
   }
-
+  /**
+   * 如果body没有超出，模态框超出，则需要paddingLeft滚动条的宽度
+   * 如果body超出，模态框没有超出，则需要paddingRight滚动条的宽度
+   */
   Modal.prototype.adjustDialog = function () {
     var modalIsOverflowing = this.$element[0].scrollHeight > document.documentElement.clientHeight
 
@@ -272,7 +281,7 @@
       // IE8没有window.innerWidth，所以需要用左边减右边来获得窗口大小
       fullWindowWidth = documentElementRect.right - Math.abs(documentElementRect.left)
     }
-    // 窗口大小是否大于可视窗口大小，来判断是否overflow。如果大于，则overflow
+    // 窗口大小是否大于可视窗口大小，来判断body宽度是否overflow。如果大于，则overflow
     // 窗口大小比可视窗口大小大的值，其实就是滚动条的宽度（不用这个方法获取滚动条宽度是，万一页面没有滚动条，那就无法获取滚动条宽度）
     this.bodyIsOverflowing = document.body.clientWidth < fullWindowWidth
     this.scrollbarWidth = this.measureScrollbar()
