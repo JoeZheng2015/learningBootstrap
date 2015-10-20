@@ -12,30 +12,30 @@
 
   // MODAL CLASS DEFINITION
   // ======================
-  /**
-   * 初始化实例属性，如有有remote则从远端加载内容
-   * @param {object} element 模态框的dom对象
-   * @param {object} options 参数
-   */
-  var Modal = function (element, options) {
-    this.options             = options
-    this.$body               = $(document.body)
-    this.$element            = $(element) // 模态框的jquery对象
-    this.$dialog             = this.$element.find('.modal-dialog')
-    this.$backdrop           = null
-    this.isShown             = null
-    this.originalBodyPad     = null
-    this.scrollbarWidth      = 0
-    this.ignoreBackdropClick = false
-    // 从指定url中load内容
-    if (this.options.remote) {
-      this.$element
-        .find('.modal-content')
-        .load(this.options.remote, $.proxy(function () {
-          this.$element.trigger('loaded.bs.modal')
-        }, this))
-    }
+/**
+ * 初始化实例属性，如有有remote则从远端加载内容
+ * @param {object} element 模态框的dom对象
+ * @param {object} options 参数
+ */
+var Modal = function (element, options) {
+  this.options             = options
+  this.$body               = $(document.body)
+  this.$element            = $(element) // 模态框的jquery对象
+  this.$dialog             = this.$element.find('.modal-dialog')
+  this.$backdrop           = null
+  this.isShown             = null
+  this.originalBodyPad     = null
+  this.scrollbarWidth      = 0
+  this.ignoreBackdropClick = false
+  // 从指定url中load内容
+  if (this.options.remote) {
+    this.$element
+      .find('.modal-content')
+      .load(this.options.remote, $.proxy(function () {
+        this.$element.trigger('loaded.bs.modal')
+      }, this))
   }
+}
 
   Modal.VERSION  = '3.3.5'
 
@@ -52,7 +52,8 @@
     return this.isShown ? this.hide() : this.show(_relatedTarget)
   }
   /**
-   * [show description]
+   * 完成滚动条的检查，键盘事件，窗口大小事件的绑定。在backdrop遮罩层出现后，才在回调里显示模态框
+   * 顺序是checkScrollbar->setScrollbar->escape->resize->backdrop->模态框显示
    * @param  {object} _relatedTarget 触发元素的dom对象
    * @return {undefined}                无返回值
    */
@@ -114,7 +115,7 @@
         that.$element.trigger('focus').trigger(e)
     })
   }
-  /** 先取消一系列事件，然后调用去除过渡，在调用hideModal隐藏模态框 */
+  /** 与show相反，先取消一系列事件，然后调用去除过渡，在调用hideModal隐藏模态框 */
   Modal.prototype.hide = function (e) {
     if (e) e.preventDefault()
 
@@ -172,7 +173,7 @@
       $(window).off('resize.bs.modal')
     }
   }
-  /** 完成隐藏模态框的相应逻辑 */
+  /** 先隐藏模态框，然后移除遮罩层 */
   Modal.prototype.hideModal = function () {
     var that = this
     this.$element.hide()
