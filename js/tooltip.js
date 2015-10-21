@@ -15,7 +15,7 @@
   // ===============================
   /**
    * 初始化所有属性为null，然后调用init方法
-   * @param {object} element tooltip的触发dom元素
+   * @param {object} element 带有data-toggle="tooltip"的dom对象
    * @param {object} options 在初始化时，传入Tooltips构造函数的参数
    */
   var Tooltip = function (element, options) {
@@ -26,7 +26,7 @@
     this.hoverState = null
     this.$element   = null
     this.inState    = null
-
+    
     this.init('tooltip', element, options)
   }
 
@@ -52,7 +52,7 @@
   /**
    * [init description]
    * @param  {string} type    'tooltip'做命名空间
-   * @param  {object} element 触发tooltip的dom元素
+   * @param  {object} element 触发tooltip的dom对象
    * @param  {object} options 初始化时的参数
    * @return {undefined}         无返回
    */
@@ -80,7 +80,7 @@
       } else if (trigger != 'manual') {
         var eventIn  = trigger == 'hover' ? 'mouseenter' : 'focusin'
         var eventOut = trigger == 'hover' ? 'mouseleave' : 'focusout'
-
+        // 无论给对应的进入和移出（无论是mouseenter或focusin），绑定enter和leave事件
         this.$element.on(eventIn  + '.' + this.type, this.options.selector, $.proxy(this.enter, this))
         this.$element.on(eventOut + '.' + this.type, this.options.selector, $.proxy(this.leave, this))
       }
@@ -112,7 +112,11 @@
 
     return options
   }
-
+  /**
+   * 让_options中相对默认的option中，有变化的值同步到options中
+   * 因为当selector为true时，修改了trigger和selector属性的值
+   * @return {object} 与_options同步后的参数
+   */
   Tooltip.prototype.getDelegateOptions = function () {
     var options  = {}
     var defaults = this.getDefaults()
@@ -123,8 +127,14 @@
 
     return options
   }
-
+  /**
+   * 进入事件的处理程序
+   * @param  {object} obj 事件对象
+   * @return {undefined}     无
+   */
   Tooltip.prototype.enter = function (obj) {
+    // 因为绑定时用了proxy,所以该作用域下的this是tooltip实例
+    // 而$(obj.currentTarget).data('bs.' + this.type)是缓存在元素上的new出来的对象实例，这样做是为什么
     var self = obj instanceof this.constructor ?
       obj : $(obj.currentTarget).data('bs.' + this.type)
 
@@ -132,11 +142,11 @@
       self = new this.constructor(obj.currentTarget, this.getDelegateOptions())
       $(obj.currentTarget).data('bs.' + this.type, self)
     }
-
+    // 把对应的inState值改变
     if (obj instanceof $.Event) {
       self.inState[obj.type == 'focusin' ? 'focus' : 'hover'] = true
     }
-
+    // 检测提示框是否定义了需要过渡效果，有就return？
     if (self.tip().hasClass('in') || self.hoverState == 'in') {
       self.hoverState = 'in'
       return
@@ -145,7 +155,7 @@
     clearTimeout(self.timeout)
 
     self.hoverState = 'in'
-
+    // 如果不需要延迟出现，直接调用show方法
     if (!self.options.delay || !self.options.delay.show) return self.show()
 
     self.timeout = setTimeout(function () {
@@ -200,7 +210,7 @@
       var $tip = this.tip()
 
       var tipId = this.getUID(this.type)
-
+      // 把title写入提示框中
       this.setContent()
       $tip.attr('id', tipId)
       this.$element.attr('aria-describedby', tipId)
@@ -220,7 +230,7 @@
         .css({ top: 0, left: 0, display: 'block' })
         .addClass(placement)
         .data('bs.' + this.type, this)
-
+      // 根据container判断插入的位置
       this.options.container ? $tip.appendTo(this.options.container) : $tip.insertAfter(this.$element)
       this.$element.trigger('inserted.bs.' + this.type)
 
@@ -367,13 +377,23 @@
   Tooltip.prototype.hasContent = function () {
     return this.getTitle()
   }
-
+  /**
+   * 返回触发提示框的dom元素的位置信息
+   * @param  {object} $element 需要的jquery对象，若没有则取实例中的
+   * @return {object}          包含位置信息的对象
+   *                           width: 元素的宽度
+   *                           height: 元素高度
+   *                           top: 顶部相对视口的偏移
+   *                           left: 左边相对视口的偏移
+   *                           scroll: 滚动高度
+   *                            
+   */
   Tooltip.prototype.getPosition = function ($element) {
     $element   = $element || this.$element
 
     var el     = $element[0]
-    var isBody = el.tagName == 'BODY'
-
+    var isBody = el.tagName == 'BODY' // 原来还能这样判断元素是否body
+    debugger;
     var elRect    = el.getBoundingClientRect()
     if (elRect.width == null) {
       // width and height are missing in IE8, so compute them manually; see https://github.com/twbs/bootstrap/issues/14093
@@ -421,7 +441,7 @@
 
     return delta
   }
-
+  /** 返回定义的title，顺序是先从data-original-title取，title是函数，则取函数返回值，最后去title */
   Tooltip.prototype.getTitle = function () {
     var title
     var $e = this.$element
@@ -432,13 +452,17 @@
 
     return title
   }
-
+  /**
+   * 重复取随机数，直到当前页面查询不到该标识符。作用是返回一个唯一的id
+   * @param  {string} prefix 'tooltip'作为命名空间
+   * @return {string}        由命名空间加一个随机数组成的唯一标识符
+   */
   Tooltip.prototype.getUID = function (prefix) {
     do prefix += ~~(Math.random() * 1000000)
     while (document.getElementById(prefix))
     return prefix
   }
-
+  /** 返回根据模板创建的提示框 */
   Tooltip.prototype.tip = function () {
     if (!this.$tip) {
       this.$tip = $(this.options.template)
@@ -501,7 +525,7 @@
 
   // TOOLTIP PLUGIN DEFINITION
   // =========================
-
+  /** 遍历把data-toggle="tooltip"的元素传入Tooltip中初始化 */
   function Plugin(option) {
     return this.each(function () {
       var $this   = $(this)
