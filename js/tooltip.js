@@ -233,15 +233,14 @@
       // 根据container判断插入的位置
       this.options.container ? $tip.appendTo(this.options.container) : $tip.insertAfter(this.$element)
       this.$element.trigger('inserted.bs.' + this.type)
-
+      // 得到触发元素的位置，宽度和高度
       var pos          = this.getPosition()
       var actualWidth  = $tip[0].offsetWidth
       var actualHeight = $tip[0].offsetHeight
-
+      // 如果自动放置，会根据情况选在哪里出现提示框
       if (autoPlace) {
         var orgPlacement = placement
         var viewportDim = this.getPosition(this.$viewport)
-
         placement = placement == 'bottom' && pos.bottom + actualHeight > viewportDim.bottom ? 'top'    :
                     placement == 'top'    && pos.top    - actualHeight < viewportDim.top    ? 'bottom' :
                     placement == 'right'  && pos.right  + actualWidth  > viewportDim.width  ? 'left'   :
@@ -393,7 +392,7 @@
 
     var el     = $element[0]
     var isBody = el.tagName == 'BODY' // 原来还能这样判断元素是否body
-    debugger;
+    
     var elRect    = el.getBoundingClientRect()
     if (elRect.width == null) {
       // width and height are missing in IE8, so compute them manually; see https://github.com/twbs/bootstrap/issues/14093
