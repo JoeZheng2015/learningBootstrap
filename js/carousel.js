@@ -208,6 +208,7 @@
   var clickHandler = function (e) {
     var href
     var $this   = $(this)
+    // target指的是轮播容器
     var $target = $($this.attr('data-target') || (href = $this.attr('href')) && href.replace(/.*(?=#[^\s]+$)/, '')) // strip for ie7
     if (!$target.hasClass('carousel')) return
     var options = $.extend({}, $target.data(), $this.data())
@@ -222,11 +223,11 @@
 
     e.preventDefault()
   }
-
+  // 为翻页data-slide和锚点data-slide-to绑定点击事件
   $(document)
     .on('click.bs.carousel.data-api', '[data-slide]', clickHandler)
     .on('click.bs.carousel.data-api', '[data-slide-to]', clickHandler)
-
+  // 初始化轮播容器
   $(window).on('load', function () {
     $('[data-ride="carousel"]').each(function () {
       var $carousel = $(this)
