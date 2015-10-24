@@ -78,10 +78,9 @@
     this.transitioning = 1
 
     var complete = function () {
-      return;
       this.$element
-        .removeClass('collapsing')
-        .addClass('collapse in')[dimension]('') // 让内容区展开
+        .removeClass('collapsing')// 去除对内容区高度的限制
+        .addClass('collapse in')[dimension]('') // 让内容区保持展开
       this.transitioning = 0
       this.$element
         .trigger('shown.bs.collapse')
