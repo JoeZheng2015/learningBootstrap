@@ -1,29 +1,70 @@
+* {
+  	margin: 0;
+  	padding: 0;
+}
+body {
+	font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+  	font-size: 14px;
+  	line-height: 1.75;
+  	color: #333;
+  	background-color: #fff;
+}
+li {
+  	list-style: none;
+}
+a {
+  	text-decoration: none;
+}
+.main {
+	background-color: #f0f2f1;
+	border-radius: 10px;
+	box-shadow: 3px 3px 9px rgba(0,0,0,.2);
+	overflow: hidden;
+	margin: 10px auto;
+	width: 768px;
+}
+.main-lists {
+	padding: 0 40px;
+}
+.main-lists>li h2 {
+	color: #00796b;
+	font-size: 24px;
+	border-bottom: 1px solid #00796b;
+	padding-left: 20px;
+}
+.main-lists>li h3 {
+	color: #004d40;
+	font-size: 18px;
+}
+.main-lists>li {
+	margin-top: 20px;
+}
 .demo-lists {
 	border-left: 2px solid #00796b;
 	margin: 15px 0 0 15px;
 	padding: 0 0 15px 20px;
 }
-.demo-lists li {
+.demo-lists>li {
 	position: relative;
-	top: -3px;
+	top: -13px;
 	color: #333;
 	font-size: 16px;
 }
-.demo-lists li .circle {
+.demo-lists>li .circle {
 	background-color: #00796b;
 	border-radius: 100%;
 	height: 14px;
 	width: 14px;
 	position: absolute;
 	left: -27px;
-	top: 3px;
+	top: 13px;
 }
-.demo-lists li .title {
+.demo-lists>li .title {
 	color: #000;
 	font-size: 18px;
-	line-height: 20px;
 	font-weight: bold;
+	line-height: 40px;
 }
-.demo-lists li .title:hover {
+.demo-lists>li .title:hover {
 	color: #4db6ac;
 }
